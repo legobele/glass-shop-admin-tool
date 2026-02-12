@@ -1,16 +1,15 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QGI Admin Dashboard v0.6 (With Auth)</title>
+    <title>QGI Admin Dashboard v0.6</title>
     <style>
         * {
             max-height: 95vh;
             margin: 0;
             padding: 0;
-            /* box-sizing: border-box; */
+            box-sizing: border-box;
         }
 
         body {
@@ -20,14 +19,17 @@
         }
 
         .dashboard-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-        }
+    max-width: 1400px;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    max-height: 95vh;
+    display: flex;
+    flex-direction: column;
+}
 
         .header {
             background: linear-gradient(135deg, #e74c3c, #c0392b);
@@ -147,7 +149,7 @@
             padding: 8px 12px;
             border: 2px solid #e0e6ed;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 14px; /* HOLY HELL I FIGURED OUT HOW TO COMMENT IN HTML FOR ONCE */
         }
 
         .refresh-btn {
@@ -164,14 +166,15 @@
         .refresh-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
-            transition: all 0.3s ease;
+            transition: all 0.3s ease; /* PERFECTION */
         }
 
-        .orders-container {
-            padding: 20px 30px;
-            max-height: 600px;
-            overflow-y: auto;
-        }
+.orders-container {
+    padding: 20px 30px;
+    max-height: calc(95vh - 500px);  /* subtract header + stats + controls height */
+    overflow-y: auto; /* WHAT THE FUCK IS AN OVERFLOW */
+    flex: 1;  /* take remaining space */
+}
 
         .order-card {
             background: white;
