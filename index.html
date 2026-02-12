@@ -171,7 +171,7 @@
 
 .orders-container {
     padding: 20px 30px;
-    max-height: calc(95vh - 500px);  /* subtract header + stats + controls height */
+    max-height: calc(95vh - 100px);  /* subtract header + stats + controls height */
     overflow-y: auto; /* WHAT THE FUCK IS AN OVERFLOW */
     flex: 1;  /* take remaining space */
 }
@@ -404,125 +404,7 @@
         }
 
         .modal-description {
-            color: #6c757d;
-            margin-bottom: 20px;
-            font-size: clamp(0.85rem, 2vw, 1rem);
-        }
-
-        .status-selector {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-bottom: 25px;
-        }
-
-        .status-option {
-            padding: 15px;
-            border: 2px solid #e0e6ed;
-            border-radius: 10px;
-            cursor: pointer;
-            text-align: center;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .status-option:hover {
-            border-color: #e74c3c;
-            transform: scale(1.05);
-        }
-
-        .status-option.selected {
-            border-color: #e74c3c;
-            background: #e74c3c;
-            color: white;
-        }
-
-        .pin-input-section {
-            background: #fff3cd;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 25px;
-        }
-
-        .pin-input-section h4 {
-            color: #856404;
-            margin-bottom: 15px;
-        }
-
-        .pin-input {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #ffc107;
-            border-radius: 10px;
-            font-size: 1.5rem;
-            text-align: center;
-            letter-spacing: 4px;
-            font-family: monospace;
-        }
-
-        .pin-input:focus {
-            outline: none;
-            border-color: #ff9800;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .modal-btn {
-            flex: 1;
-            padding: 15px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            color: white;
-        }
-
-        .btn-secondary {
-            background: #e0e6ed;
-            color: #2c3e50;
-        }
-
-        .modal-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-
-        .error-message {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 15px;
-            display: none;
-        }
-
-        .error-message.active {
-            display: block;
-        }
-
-        @media (max-width: 768px) {
-            .order-info {
-                grid-template-columns: 1fr;
-            }
-
-            .customer-input-group {
-                grid-template-columns: 1fr;
-            }
-
-            .status-selector {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+     …</style>
 </head>
 <body>
     <div class="dashboard-container">
