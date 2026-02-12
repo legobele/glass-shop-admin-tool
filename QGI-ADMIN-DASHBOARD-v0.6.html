@@ -1,0 +1,1515 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QGI Admin Dashboard v0.6 (With Auth)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left {
+            flex: 1;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .header-btn {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .header-btn:hover {
+            background: white;
+            color: #e74c3c;
+        }
+
+        .lang-toggle {
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.3);
+            border: 2px solid white;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .lang-toggle:hover {
+            background: white;
+            color: #e74c3c;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 20px 30px;
+            background: #f8f9fa;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #e74c3c;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #6c757d;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .controls {
+            padding: 20px 30px;
+            background: white;
+            border-bottom: 2px solid #f1f3f4;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .filter-select {
+            padding: 8px 12px;
+            border: 2px solid #e0e6ed;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .refresh-btn {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .orders-container {
+            padding: 20px 30px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .order-card {
+            background: white;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 15px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .order-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+            border-color: #e74c3c;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f1f3f4;
+        }
+
+        .order-id {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .order-timestamp {
+            color: #6c757d;
+            font-size: 0.85rem;
+        }
+
+        .status-badge {
+            padding: 6px 14px;
+            border-radius: 18px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-pending { 
+            background: linear-gradient(135deg, #ffeaa7, #fdcb6e); 
+            color: #d63031; 
+        }
+        .status-in-progress { 
+            background: linear-gradient(135deg, #74b9ff, #0984e3); 
+            color: white; 
+        }
+        .status-ready { 
+            background: linear-gradient(135deg, #00b894, #00a085); 
+            color: white; 
+        }
+        .status-completed { 
+            background: linear-gradient(135deg, #6c757d, #495057); 
+            color: white; 
+        }
+        .status-cancelled { 
+            background: linear-gradient(135deg, #fd79a8, #e84393); 
+            color: white; 
+        }
+
+        .order-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .info-section {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .info-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-item {
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+        }
+
+        .info-label {
+            color: #6c757d;
+        }
+
+        .info-value {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .customer-section {
+            background: #e3f2fd;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .customer-input-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .customer-input {
+            padding: 8px 12px;
+            border: 2px solid #90caf9;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .customer-input:focus {
+            outline: none;
+            border-color: #1976d2;
+        }
+
+        .customer-btn {
+            padding: 8px 16px;
+            background: #1976d2;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .customer-btn:hover {
+            background: #1565c0;
+        }
+
+        .order-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-status {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-edit {
+            background: linear-gradient(135deg, #ffc107, #ff9800);
+            color: #000;
+        }
+
+        .btn-delete {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: clamp(20px, 3vw, 40px);
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalPop 0.3s ease;
+        }
+
+        @keyframes modalPop {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-title {
+            font-size: clamp(1.3rem, 3vw, 1.8rem);
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .modal-description {
+            color: #6c757d;
+            margin-bottom: 20px;
+            font-size: clamp(0.85rem, 2vw, 1rem);
+        }
+
+        .status-selector {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .status-option {
+            padding: 15px;
+            border: 2px solid #e0e6ed;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .status-option:hover {
+            border-color: #e74c3c;
+            transform: scale(1.05);
+        }
+
+        .status-option.selected {
+            border-color: #e74c3c;
+            background: #e74c3c;
+            color: white;
+        }
+
+        .pin-input-section {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+
+        .pin-input-section h4 {
+            color: #856404;
+            margin-bottom: 15px;
+        }
+
+        .pin-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            font-size: 1.5rem;
+            text-align: center;
+            letter-spacing: 4px;
+            font-family: monospace;
+        }
+
+        .pin-input:focus {
+            outline: none;
+            border-color: #ff9800;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #e0e6ed;
+            color: #2c3e50;
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .order-info {
+                grid-template-columns: 1fr;
+            }
+
+            .customer-input-group {
+                grid-template-columns: 1fr;
+            }
+
+            .status-selector {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="header">
+            <div class="header-left">
+                <div class="logo">QGI Admin Dashboard</div>
+                <div class="subtitle" data-i18n="subtitle">Sales Team Portal v0.4</div>
+            </div>
+            <div class="header-actions">
+                <span id="user-info" style="margin-right: 15px; opacity: 0.9;"></span>
+                <button class="lang-toggle" onclick="toggleLanguage()" id="langToggle">🌐 ES</button>
+                <button class="header-btn" onclick="window.location.href='https://legobele.github.io/glass-shop-admin-tool-acc-settings'">
+                    <span>⚙️ Settings</span>
+                </button>
+                <button class="header-btn" onclick="downloadActivityLog()">
+                    <span data-i18n="downloadLog">📥 Download Activity Log</span>
+                </button>
+                <button class="header-btn" onclick="loadOrders()">
+                    <span data-i18n="refresh">🔄 Refresh</span>
+                </button>
+                <button class="header-btn" onclick="logout()" style="background: rgba(255,100,100,0.3);">
+                    <span>🚪 Logout</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="stats-grid" id="statsGrid">
+            <!-- Stats will be populated here -->
+        </div>
+
+        <div class="controls">
+            <div class="filter-group">
+                <label data-i18n="filterLabel">Filter by status:</label>
+                <select class="filter-select" id="statusFilter" onchange="filterOrders()">
+                    <option value="all" data-i18n="allOrders">All Orders</option>
+                    <option value="pending" data-i18n="pending">Pending</option>
+                    <option value="in-progress" data-i18n="inProgress">In Progress</option>
+                    <option value="ready" data-i18n="ready">Ready</option>
+                    <option value="completed" data-i18n="completed">Completed</option>
+                    <option value="cancelled" data-i18n="cancelled">Cancelled</option>
+                </select>
+            </div>
+            <button class="refresh-btn" onclick="loadOrders()">
+                <span data-i18n="refreshOrders">Refresh Orders</span>
+            </button>
+        </div>
+
+        <div class="orders-container" id="ordersContainer">
+            <!-- Orders will be populated here -->
+        </div>
+    </div>
+
+    <!-- Status Change Modal -->
+    <div class="modal" id="statusModal">
+        <div class="modal-content">
+            <h2 class="modal-title" data-i18n="changeStatus">Change Order Status</h2>
+            <p class="modal-description">
+                <span data-i18n="updateStatusDesc">Update the status of order</span> 
+                <strong id="statusModalOrderId"></strong>
+            </p>
+
+            <div class="status-selector" id="statusSelector">
+                <div class="status-option" data-status="pending">
+                    <span data-i18n="statusPending">⏳ Pending</span>
+                </div>
+                <div class="status-option" data-status="in-progress">
+                    <span data-i18n="statusInProgress">🔧 In Progress</span>
+                </div>
+                <div class="status-option" data-status="ready">
+                    <span data-i18n="statusReady">✅ Ready</span>
+                </div>
+                <div class="status-option" data-status="completed">
+                    <span data-i18n="statusCompleted">📦 Completed</span>
+                </div>
+                <div class="status-option" data-status="cancelled">
+                    <span data-i18n="statusCancelled">❌ Cancelled</span>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="modal-btn btn-secondary" onclick="closeStatusModal()">
+                    <span data-i18n="cancel">Cancel</span>
+                </button>
+                <button class="modal-btn btn-primary" onclick="updateStatus()">
+                    <span data-i18n="updateStatus">Update Status</span>
+                </button>
+            </div>
+
+            <div class="error-message" id="statusError"></div>
+        </div>
+    </div>
+
+    <!-- Edit Order Modal -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <h2 class="modal-title" data-i18n="editOrderTitle">Edit Order Details</h2>
+            <p class="modal-description">
+                <span data-i18n="pinRequired">Customer PIN required to edit order</span>
+                <strong id="editModalOrderId"></strong>
+            </p>
+
+            <div class="pin-input-section">
+                <h4 data-i18n="enterPin">🔒 Enter Customer PIN</h4>
+                <input type="text" class="pin-input" id="editPinInput" placeholder="000000" maxlength="6">
+            </div>
+
+            <div class="modal-actions">
+                <button class="modal-btn btn-secondary" onclick="closeEditModal()">
+                    <span data-i18n="cancel">Cancel</span>
+                </button>
+                <button class="modal-btn btn-primary" onclick="verifyAndEdit()">
+                    <span data-i18n="verifyEdit">Verify & Edit</span>
+                </button>
+            </div>
+
+            <div class="error-message" id="editError"></div>
+        </div>
+    </div>
+
+    <!-- Edit Form Modal (shown after PIN verification) -->
+    <div class="modal" id="editFormModal">
+        <div class="modal-content" style="max-width: 700px;">
+            <h2 class="modal-title">
+                <span data-i18n="editOrder">Edit Order</span> 
+                <span id="editFormOrderId"></span>
+            </h2>
+            <p class="modal-description" data-i18n="modifyDetails">Modify order details below</p>
+
+            <div style="max-height: 60vh; overflow-y: auto; padding: 10px;">
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                    <h4 style="margin-bottom: 10px;" data-i18n="dimensions">📏 Dimensions</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div>
+                            <label style="font-size: 0.85rem; color: #6c757d;" data-i18n="width">Width (inches)</label>
+                            <input type="number" id="editWidth" class="customer-input" style="width: 100%; margin-top: 5px;" step="0.01">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.85rem; color: #6c757d;" data-i18n="height">Height (inches)</label>
+                            <input type="number" id="editHeight" class="customer-input" style="width: 100%; margin-top: 5px;" step="0.01">
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                    <h4 style="margin-bottom: 10px;" data-i18n="specifications">🎨 Specifications</h4>
+                    <div style="margin-bottom: 10px;">
+                        <label style="font-size: 0.85rem; color: #6c757d;" data-i18n="color">Color</label>
+                        <select id="editColor" class="customer-input" style="width: 100%; margin-top: 5px;">
+                            <option value="clear" data-i18n="clear">Clear</option>
+                            <option value="bronze" data-i18n="bronze">Bronze</option>
+                            <option value="gray" data-i18n="gray">Gray</option>
+                            <option value="blue" data-i18n="blue">Blue</option>
+                            <option value="green" data-i18n="green">Green</option>
+                            <option value="antique" data-i18n="antique">Antique</option>
+                            <option value="mirror-clear" data-i18n="mirrorClear">Mirror Clear</option>
+                            <option value="mirror-dark" data-i18n="mirrorDark">Mirror Dark</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.85rem; color: #6c757d;" data-i18n="thickness">Thickness</label>
+                        <select id="editThickness" class="customer-input" style="width: 100%; margin-top: 5px;">
+                            <option value="1/8 in">1/8"</option>
+                            <option value="1/4 in">1/4"</option>
+                            <option value="3/8 in">3/8"</option>
+                            <option value="1/2 in">1/2"</option>
+                            <option value="3/4 in">3/4"</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                    <h4 style="margin-bottom: 10px;" data-i18n="additionalServices">➕ Additional Services</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+                        <label style="display: flex; align-items: center; padding: 8px; background: white; border-radius: 8px; cursor: pointer;">
+                            <input type="checkbox" id="editDiamondFusion" style="margin-right: 8px;">
+                            <span style="font-size: 0.9rem;" data-i18n="diamonFusion">Diamon-Fusion Treatment</span>
+                        </label>
+                        <label style="display: flex; align-items: center; padding: 8px; background: white; border-radius: 8px; cursor: pointer;">
+                            <input type="checkbox" id="editTempering" style="margin-right: 8px;">
+                            <span style="font-size: 0.9rem;" data-i18n="tempering">Tempering</span>
+                        </label>
+                        <label style="display: flex; align-items: center; padding: 8px; background: white; border-radius: 8px; cursor: pointer;">
+                            <input type="checkbox" id="editSandblasting" style="margin-right: 8px;">
+                            <span style="font-size: 0.9rem;" data-i18n="sandblasting">Sandblasting</span>
+                        </label>
+                        <label style="display: flex; align-items: center; padding: 8px; background: white; border-radius: 8px; cursor: pointer;">
+                            <input type="checkbox" id="editBeveling" style="margin-right: 8px;">
+                            <span style="font-size: 0.9rem;" data-i18n="beveling">Beveling</span>
+                        </label>
+                        <label style="display: flex; align-items: center; padding: 8px; background: white; border-radius: 8px; cursor: pointer; grid-column: span 2;">
+                            <input type="checkbox" id="editEdgeRounding" style="margin-right: 8px;">
+                            <span style="font-size: 0.9rem;" data-i18n="edgeRounding">Edge Rounding</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 10px;">
+                    <h4 style="margin-bottom: 10px;" data-i18n="paymentMethod">💳 Payment Method</h4>
+                    <select id="editPayment" class="customer-input" style="width: 100%;">
+                        <option value="cash" data-i18n="cash">Cash</option>
+                        <option value="credit-debit" data-i18n="creditDebit">Credit/Debit Card</option>
+                        <option value="apple-google-ath" data-i18n="digitalPayment">Apple Pay / Google Pay / ATH Móvil</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="modal-actions" style="margin-top: 20px;">
+                <button class="modal-btn btn-secondary" onclick="closeEditFormModal()">
+                    <span data-i18n="cancel">Cancel</span>
+                </button>
+                <button class="modal-btn btn-primary" onclick="saveOrderEdits()">
+                    <span data-i18n="saveChanges">💾 Save Changes</span>
+                </button>
+            </div>
+
+            <div class="error-message" id="editFormError"></div>
+        </div>
+    </div>
+
+    <script>
+        const SERVER_CONFIG = {
+            baseUrl: 'https://vague-nonspeculatively-florida.ngrok-free.dev',
+            endpoints: {
+                orders: '/api/orders',
+                stats: '/api/stats',
+                updateStatus: '/api/orders/:id/status',
+                updateCustomer: '/api/orders/:id/customer',
+                verifyPin: '/api/orders/:id/verify-pin',
+                updateOrder: '/api/orders/:id',
+                deleteOrder: '/api/orders/:id',
+                activityLog: '/api/activity/download',
+                generatePin: '/api/orders/:id/generate-pin'
+            }
+        };
+
+        // Auth helpers
+        function getAuthToken() {
+            return localStorage.getItem('qgi-auth-token');
+        }
+
+        function getAuthHeaders() {
+            const token = getAuthToken();
+            return {
+                'Content-Type': 'application/json',
+                'ngrok-skip-browser-warning': 'true',
+                'Authorization': token ? `Bearer ${token}` : ''
+            };
+        }
+
+        function logout() {
+            localStorage.removeItem('qgi-auth-token');
+            localStorage.removeItem('qgi-user');
+            window.location.href = 'https://legobele.github.io/glass-shop-admin-login-page';
+        }
+
+        // Check auth on page load
+        window.addEventListener('load', async function() {
+            const token = getAuthToken();
+            if (!token) {
+                window.location.href = 'https://legobele.github.io/glass-shop-admin-login-page';
+                return;
+            }
+
+            // Verify token is still valid
+            try {
+                const response = await fetch(`${SERVER_CONFIG.baseUrl}/api/auth/verify`, {
+                    headers: getAuthHeaders()
+                });
+
+                if (!response.ok) {
+                    logout();
+                    return;
+                }
+
+                const data = await response.json();
+                
+                // Display user info
+                const userInfo = localStorage.getItem('qgi-user');
+                if (userInfo) {
+                    const user = JSON.parse(userInfo);
+                    document.getElementById('user-info').textContent = `👤 ${user.fullName || user.email}`;
+                }
+            } catch (error) {
+                console.error('Auth verification failed:', error);
+                logout();
+            }
+        });
+
+        // Translations
+        const translations = {
+            en: {
+                subtitle: "Sales Team Portal v0.4",
+                downloadLog: "📥 Download Activity Log",
+                refresh: "🔄 Refresh",
+                filterLabel: "Filter by status:",
+                allOrders: "All Orders",
+                pending: "Pending",
+                inProgress: "In Progress",
+                ready: "Ready",
+                completed: "Completed",
+                cancelled: "Cancelled",
+                refreshOrders: "Refresh Orders",
+                totalOrders: "Total Orders",
+                todayOrders: "Today's Orders",
+                changeStatus: "Change Order Status",
+                updateStatusDesc: "Update the status of order",
+                statusPending: "⏳ Pending",
+                statusInProgress: "🔧 In Progress",
+                statusReady: "✅ Ready",
+                statusCompleted: "📦 Completed",
+                statusCancelled: "❌ Cancelled",
+                cancel: "Cancel",
+                updateStatus: "Update Status",
+                editOrderTitle: "Edit Order Details",
+                pinRequired: "Customer PIN required to edit order",
+                enterPin: "🔒 Enter Customer PIN",
+                verifyEdit: "Verify & Edit",
+                editOrder: "Edit Order",
+                modifyDetails: "Modify order details below",
+                dimensions: "📏 Dimensions",
+                width: "Width (inches)",
+                height: "Height (inches)",
+                specifications: "🎨 Specifications",
+                color: "Color",
+                clear: "Clear",
+                bronze: "Bronze",
+                gray: "Gray",
+                blue: "Blue",
+                green: "Green",
+                antique: "Antique",
+                mirrorClear: "Mirror Clear",
+                mirrorDark: "Mirror Dark",
+                thickness: "Thickness",
+                additionalServices: "➕ Additional Services",
+                diamonFusion: "Diamon-Fusion Treatment",
+                tempering: "Tempering",
+                sandblasting: "Sandblasting",
+                beveling: "Beveling",
+                edgeRounding: "Edge Rounding",
+                paymentMethod: "💳 Payment Method",
+                cash: "Cash",
+                creditDebit: "Credit/Debit Card",
+                digitalPayment: "Apple Pay / Google Pay / ATH Móvil",
+                saveChanges: "💾 Save Changes",
+                customerInfo: "👤 Customer Information",
+                customerName: "Customer Name",
+                customerId: "Customer ID",
+                save: "💾 Save",
+                changeStatusBtn: "🔄 Change Status",
+                editOrderBtn: "✏️ Edit Order (Requires PIN)",
+                deleteBtn: "🗑️ Delete",
+                noOrders: "No Orders Found",
+                noOrdersDesc: "No orders match the current filter"
+            },
+            es: {
+                subtitle: "Portal del Equipo de Ventas v0.4",
+                downloadLog: "📥 Descargar Registro",
+                refresh: "🔄 Actualizar",
+                filterLabel: "Filtrar por estado:",
+                allOrders: "Todas las Órdenes",
+                pending: "Pendiente",
+                inProgress: "En Progreso",
+                ready: "Listo",
+                completed: "Completado",
+                cancelled: "Cancelado",
+                refreshOrders: "Actualizar Órdenes",
+                totalOrders: "Total de Órdenes",
+                todayOrders: "Órdenes de Hoy",
+                changeStatus: "Cambiar Estado de Orden",
+                updateStatusDesc: "Actualizar el estado de la orden",
+                statusPending: "⏳ Pendiente",
+                statusInProgress: "🔧 En Progreso",
+                statusReady: "✅ Listo",
+                statusCompleted: "📦 Completado",
+                statusCancelled: "❌ Cancelado",
+                cancel: "Cancelar",
+                updateStatus: "Actualizar Estado",
+                editOrderTitle: "Editar Detalles de Orden",
+                pinRequired: "Se requiere PIN del cliente para editar orden",
+                enterPin: "🔒 Ingrese PIN del Cliente",
+                verifyEdit: "Verificar y Editar",
+                editOrder: "Editar Orden",
+                modifyDetails: "Modificar detalles de la orden",
+                dimensions: "📏 Dimensiones",
+                width: "Ancho (pulgadas)",
+                height: "Alto (pulgadas)",
+                specifications: "🎨 Especificaciones",
+                color: "Color",
+                clear: "Claro",
+                bronze: "Bronce",
+                gray: "Gris",
+                blue: "Azul",
+                green: "Verde",
+                antique: "Antiguo",
+                mirrorClear: "Espejo Claro",
+                mirrorDark: "Espejo Oscuro",
+                thickness: "Grosor",
+                additionalServices: "➕ Servicios Adicionales",
+                diamonFusion: "Tratamiento Diamon-Fusion",
+                tempering: "Templado",
+                sandblasting: "Arenado",
+                beveling: "Biselado",
+                edgeRounding: "Redondeo de Bordes",
+                paymentMethod: "💳 Método de Pago",
+                cash: "Efectivo",
+                creditDebit: "Tarjeta de Crédito/Débito",
+                digitalPayment: "Apple Pay / Google Pay / ATH Móvil",
+                saveChanges: "💾 Guardar Cambios",
+                customerInfo: "👤 Información del Cliente",
+                customerName: "Nombre del Cliente",
+                customerId: "ID del Cliente",
+                save: "💾 Guardar",
+                changeStatusBtn: "🔄 Cambiar Estado",
+                editOrderBtn: "✏️ Editar Orden (Requiere PIN)",
+                deleteBtn: "🗑️ Eliminar",
+                noOrders: "No se Encontraron Órdenes",
+                noOrdersDesc: "No hay órdenes que coincidan con el filtro actual"
+            }
+        };
+
+        let currentLang = localStorage.getItem('qgi-lang') || 'en';
+        let allOrders = [];
+        let currentEditOrderId = null;
+        let currentEditPin = null;
+        let currentEditOrder = null;
+        let selectedStatus = null;
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'es' : 'en';
+            localStorage.setItem('qgi-lang', currentLang);
+            updateLanguage();
+            loadOrders(); // Reload to update order cards
+        }
+
+        function updateLanguage() {
+            const lang = translations[currentLang];
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (lang[key]) {
+                    el.textContent = lang[key];
+                }
+            });
+            document.getElementById('langToggle').textContent = currentLang === 'en' ? '🌐 ES' : '🌐 EN';
+        }
+
+        async function loadOrders() {
+            try {
+                const response = await fetch(`${SERVER_CONFIG.baseUrl}${SERVER_CONFIG.endpoints.orders}`, {
+                    headers: getAuthHeaders()
+                });
+
+                if (!response.ok) {
+                    if (response.status === 401 || response.status === 403) {
+                        logout();
+                        return;
+                    }
+                    throw new Error('Failed to fetch orders');
+                }
+
+                allOrders = await response.json();
+                filterOrders();
+                updateStats();
+
+            } catch (error) {
+                console.error('Error loading orders:', error);
+                alert(currentLang === 'en' ? 'Failed to load orders. Please check your connection.' : 'Error al cargar órdenes. Por favor verifique su conexión.');
+            }
+        }
+
+        async function updateStats() {
+            try {
+                const response = await fetch(`${SERVER_CONFIG.baseUrl}${SERVER_CONFIG.endpoints.stats}`, {
+                    headers: getAuthHeaders()
+                });
+
+                if (!response.ok) throw new Error('Failed to fetch stats');
+
+                const stats = await response.json();
+                const lang = translations[currentLang];
+                
+                const statsHTML = `
+                    <div class="stat-card">
+                        <div class="stat-number">${stats.total}</div>
+                        <div class="stat-label">${lang.totalOrders}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${stats.todayCount}</div>
+                        <div class="stat-label">${lang.todayOrders}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${stats.byStatus.pending || 0}</div>
+                        <div class="stat-label">${lang.pending}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${stats.byStatus['in-progress'] || 0}</div>
+                        <div class="stat-label">${lang.inProgress}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${stats.byStatus.ready || 0}</div>
+                        <div class="stat-label">${lang.ready}</div>
+                    </div>
+                `;
+
+                document.getElementById('statsGrid').innerHTML = statsHTML;
+
+            } catch (error) {
+                console.error('Error updating stats:', error);
+            }
+        }
+
+        function filterOrders() {
+            const filter = document.getElementById('statusFilter').value;
+            let filteredOrders = filter === 'all' 
+                ? allOrders 
+                : allOrders.filter(o => o.status === filter);
+
+            filteredOrders.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            displayOrders(filteredOrders);
+        }
+
+        function displayOrders(orders) {
+            const lang = translations[currentLang];
+            
+            if (orders.length === 0) {
+                document.getElementById('ordersContainer').innerHTML = `
+                    <div style="text-align: center; padding: 60px; color: #6c757d;">
+                        <div style="font-size: 3rem; margin-bottom: 20px;">📦</div>
+                        <h3>${lang.noOrders}</h3>
+                        <p>${lang.noOrdersDesc}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const ordersHTML = orders.map(order => createOrderCard(order)).join('');
+            document.getElementById('ordersContainer').innerHTML = ordersHTML;
+        }
+
+        function createOrderCard(order) {
+            const lang = translations[currentLang];
+            const statusClass = `status-${order.status}`;
+            const timestamp = new Date(order.timestamp).toLocaleString();
+            
+            const statusText = {
+                'pending': lang.pending,
+                'in-progress': lang.inProgress,
+                'ready': lang.ready,
+                'completed': lang.completed,
+                'cancelled': lang.cancelled
+            }[order.status] || order.status;
+            
+            const additionsHTML = order.specifications.additions.length > 0
+                ? order.specifications.additions.map(add => `<span style="background: #667eea; color: white; padding: 3px 8px; border-radius: 10px; font-size: 0.75rem; margin-right: 5px;">${formatAddition(add)}</span>`).join('')
+                : `<span style="color: #6c757d;">${currentLang === 'en' ? 'None' : 'Ninguno'}</span>`;
+
+            return `
+                <div class="order-card">
+                    <div class="order-header">
+                        <div>
+                            <div class="order-id">${order.orderId}</div>
+                            <div class="order-timestamp">${timestamp}</div>
+                        </div>
+                        <div class="status-badge ${statusClass}">${statusText}</div>
+                    </div>
+
+                    <div class="customer-section">
+                        <div class="info-title">${lang.customerInfo}</div>
+                        <div class="customer-input-group">
+                            <input type="text" class="customer-input" id="customerName-${order.orderId}" 
+                                   placeholder="${lang.customerName}" value="${order.customerName || ''}">
+                            <input type="text" class="customer-input" id="customerId-${order.orderId}" 
+                                   placeholder="${lang.customerId}" value="${order.customerId || ''}">
+                            <button class="customer-btn" onclick="updateCustomerInfo('${order.orderId}')">
+                                ${lang.save}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="order-info">
+                        <div class="info-section">
+                            <div class="info-title">${lang.dimensions}</div>
+                            <div class="info-item">
+                                <span class="info-label">${lang.width}:</span>
+                                <span class="info-value">${order.dimensions.width}"</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">${lang.height}:</span>
+                                <span class="info-value">${order.dimensions.height}"</span>
+                            </div>
+                        </div>
+
+                        <div class="info-section">
+                            <div class="info-title">${lang.specifications}</div>
+                            <div class="info-item">
+                                <span class="info-label">${lang.color}:</span>
+                                <span class="info-value">${formatColor(order.specifications.color)}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">${lang.thickness}:</span>
+                                <span class="info-value">${order.specifications.thickness}</span>
+                            </div>
+                        </div>
+
+                        <div class="info-section">
+                            <div class="info-title">${lang.paymentMethod}</div>
+                            <div class="info-item">
+                                <span class="info-label">${currentLang === 'en' ? 'Method' : 'Método'}:</span>
+                                <span class="info-value">${formatPaymentMethod(order.payment.method)}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-section" style="margin-bottom: 20px;">
+                        <div class="info-title">${lang.additionalServices}</div>
+                        <div>${additionsHTML}</div>
+                    </div>
+
+                    <div class="order-actions">
+                        <button class="action-btn btn-status" onclick="openStatusModal('${order.orderId}')">
+                            ${lang.changeStatusBtn}
+                        </button>
+                        <button class="action-btn btn-edit" onclick="openEditModal('${order.orderId}')">
+                            ${lang.editOrderBtn}
+                        </button>
+                        <button class="action-btn btn-delete" onclick="deleteOrder('${order.orderId}')">
+                            ${lang.deleteBtn}
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function updateCustomerInfo(orderId) {
+            const customerName = document.getElementById(`customerName-${orderId}`).value.trim();
+            const customerId = document.getElementById(`customerId-${orderId}`).value.trim();
+
+            try {
+                const response = await fetch(
+                    `${SERVER_CONFIG.baseUrl}${SERVER_CONFIG.endpoints.updateCustomer.replace(':id', orderId)}`,
+                    {
+                        method: 'PATCH',
+                        headers: getAuthHeaders(),
+                        body: JSON.stringify({
+                            customerName: customerName || null,
+                            customerId: customerId || null
+                        })
+                    }
+                );
+
+                if (!response.ok) throw new Error('Failed to update customer info');
+
+                alert(currentLang === 'en' ? 'Customer information updated successfully!' : '¡Información del cliente actualizada exitosamente!');
+                loadOrders();
+
+            } catch (error) {
+                console.error('Error updating customer info:', error);
+                alert(currentLang === 'en' ? 'Failed to update customer information.' : 'Error al actualizar información del cliente.');
+            }
+        }
+
+        function openStatusModal(orderId) {
+            currentEditOrderId = orderId;
+            selectedStatus = null;
+            document.getElementById('statusModalOrderId').textContent = orderId;
+            document.querySelectorAll('.status-option').forEach(opt => opt.classList.remove('selected'));
+            document.getElementById('statusError').classList.remove('active');
+            document.getElementById('statusModal').classList.add('active');
+        }
+
+        function closeStatusModal() {
+            document.getElementById('statusModal').classList.remove('active');
+            currentEditOrderId = null;
+            selectedStatus = null;
+        }
+
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('status-option')) {
+                document.querySelectorAll('.status-option').forEach(opt => opt.classList.remove('selected'));
+                e.target.classList.add('selected');
+                selectedStatus = e.target.dataset.status;
+            }
+        });
+
+        async function updateStatus() {
+            if (!selectedStatus) {
+                const lang = translations[currentLang];
+                document.getElementById('statusError').textContent = currentLang === 'en' ? 'Please select a status' : 'Por favor seleccione un estado';
+                document.getElementById('statusError').classList.add('active');
+                return;
+            }
+
+            try {
+                const response = await fetch(
+                    `${SERVER_CONFIG.baseUrl}${SERVER_CONFIG.endpoints.updateStatus.replace(':id', currentEditOrderId)}`,
+                    {
+                        method: 'PATCH',
+                        headers: getAuthHeaders(),
+                        body: JSON.stringify({ status: selectedStatus })
+                    }
+                );
+
+                if (!response.ok) throw new Error('Failed to update status');
+
+                closeStatusModal();
+                loadOrders();
+
+            } catch (error) {
+                console.error('Error updating status:', error);
+                document.getElementById('statusError').textContent = currentLang === 'en' ? 'Failed to update status' : 'Error al actualizar estado';
+                document.getElementById('statusError').classList.add('active');
+            }
+        }
+
+        function openEditModal(orderId) {
+            currentEditOrderId = orderId;
+            document.getElementById('editModalOrderId').textContent = orderId;
+            document.getElementById('editPinInput').value = '';
+            document.getElementById('editError').classList.remove('active');
+            document.getElementById('editModal').classList.add('active');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('active');
+            document.getElementById('editPinInput').value = '';
+            document.getElementById('editError').classList.remove('active');
+            document.getElementById('editError').textContent = '';
+            currentEditOrderId = null;
+        }
+
+        async function verifyAndEdit() {
+            const pin = document.getElementById('editPinInput').value.trim();
+
+            if (!pin || pin.length !== 6) {
+                document.getElementById('editError').textContent = currentLang === 'en' ? 'Please enter a valid 6-digit PIN' : 'Por favor ingrese un PIN válido de 6 dígitos';
+                document.getElementById('editError').classList.add('active');
+                return;
+            }
+
+            try {
+                const response = await fetch(
+                    `${SERVER_CONFIG.baseUrl}${SERVER_CONFIG.endpoints.verifyPin.replace(':id', currentEditOrderId)}`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'ngrok-skip-browser-warning': 'true'
+                        },
+                        body: JSON.stringify({ pin: pin })
+                    }
+                );
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    document.getElementById('editError').textContent = currentLang === 'en' 
+                        ? 'Invalid PIN. Customer must generate a change PIN from the customer portal.' 
+                        : 'PIN inválido. El cliente debe generar un PIN de cambio desde el portal del cliente.';
+                    document.getElementById('editError').classList.add('active');
+                    return;
+                }
+
+                currentEditPin = pin;
+                currentEditOrder = result.order;
+                closeEditModal();
+                showEditForm();
+
+            } catch (error) {
+                console.error('Error verifying PIN:', error);
+                document.getElementById('editError').textContent = currentLang === 'en' ? 'Failed to verify PIN' : 'Error al verificar PIN';
+                document.getElementById('editError').classList.add('active');
+            }
+        }
+
+        function showEditForm() {
+            document.getElementById('editFormOrderId').textContent = currentEditOrder.orderId;
+            document.getElementById('editWidth').value = currentEditOrder.dimensions.width;
+            document.getElementById('editHeight').value = currentEditOrder.dimensions.height;
+            document.getElementById('editColor').value = currentEditOrder.specifications.color;
+            document.getElementById('editThickness').value = currentEditOrder.specifications.thickness;
+            
+            document.getElementById('editDiamondFusion').checked = currentEditOrder.specifications.additions.includes('diamon-fusion') || currentEditOrder.specifications.additions.includes('diamond-fusion');
+            document.getElementById('editTempering').checked = currentEditOrder.specifications.additions.includes('tempering');
+            document.getElementById('editSandblasting').checked = currentEditOrder.specifications.additions.includes('sandblasting');
+            document.getElementById('editBeveling').checked = currentEditOrder.specifications.additions.includes('beveling');
+            document.getElementById('editEdgeRounding').checked = currentEditOrder.specifications.additions.includes('edge-rounding');
+            
+            document.getElementById('editPayment').value = currentEditOrder.payment.method;
+            
+            document.getElementById('editFormModal').classList.add('active');
+        }
+
+        function closeEditFormModal() {
+            document.getElementById('editFormModal').classList.remove('active');
+            document.getElementById('editFormError').classList.remove('active');
+            currentEditPin = null;
+            currentEditOrder = null;
+        }
+
+        async function saveOrderEdits() {
+            try {
+                const additions = [];
+                if (document.getElementById('editDiamondFusion').checked) additions.push('diamon-fusion');
+                if (document.getElementById('editTempering').checked) additions.push('tempering');
+                if (document.getElementById('editSandblasting').checked) additions.push('sandblasting');
+                if (document.getElementById('editBeveling').checked) additions.push('beveling');
+                if (document.getElementById('editEdgeRounding').checked) additions.push('edge-rounding');
+
+                const updatedOrder = {
+                    orderId: currentEditOrder.orderId,
+                    timestamp: currentEditOrder.timestamp,
+                    dimensions: {
+                        width: parseFloat(document.getElementById('editWidth').value),
+                        height: parseFloat(document.getElementById('editHeight').value)
+                    },
+                    specifications: {
+                        color: document.getElementById('editColor').value,
+                        thickness: document.getElementById('editThickness').value,
+                        additions: additions
+                    },
+                    payment: {
+                        method: document.getElementById('editPayment').value
+                    },
+                    status: currentEditOrder.status,
+                    customerName: currentEditOrder.customerName,
+                    customerId: currentEditOrder.customerId
+                };
+
+                const response = await fetch(
+                    `${SERVER_CONFIG.baseUrl}${SERVER_CONFIG.endpoints.updateOrder.replace(':id', currentEditOrder.orderId)}`,
+                    {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'ngrok-skip-browser-warning': 'true'
+                        },
+                        body: JSON.stringify({
+                            pin: currentEditPin,
+                            updatedOrder: updatedOrder
+                        })
+                    }
+                );
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    throw new Error(result.message || 'Failed to update order');
+                }
+
+                closeEditFormModal();
+                alert(currentLang === 'en' ? 'Order updated successfully!' : '¡Orden actualizada exitosamente!');
+                loadOrders();
+
+            } catch (error) {
+                console.error('Error saving order edits:', error);
+                document.getElementById('editFormError').textContent = currentLang === 'en' ? error.message || 'Failed to save changes' : error.message || 'Error al guardar cambios';
+                document.getElementById('editFormError').classList.add('active');
+            }
+        }
+
+        async function deleteOrder(orderId) {
+            const confirmMsg = currentLang === 'en' 
+                ? `Are you sure you want to delete order ${orderId}?\n\nThis action cannot be undone.`
+                : `¿Está seguro que desea eliminar la orden ${orderId}?\n\nEsta acción no se puede deshacer.`;
+                
+            if (!confirm(confirmMsg)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(
+                    `${SERVER_CONFIG.baseUrl}${SERVER_CONFIG.endpoints.deleteOrder.replace(':id', orderId)}`,
+                    {
+                        method: 'DELETE',
+                        headers: getAuthHeaders()
+                    }
+                );
+
+                if (!response.ok) throw new Error('Failed to delete order');
+
+                loadOrders();
+
+            } catch (error) {
+                console.error('Error deleting order:', error);
+                alert(currentLang === 'en' ? 'Failed to delete order' : 'Error al eliminar orden');
+            }
+        }
+
+        async function downloadActivityLog() {
+            try {
+                const response = await fetch(
+                    `${SERVER_CONFIG.baseUrl}${SERVER_CONFIG.endpoints.activityLog}`,
+                    {
+                        headers: getAuthHeaders()
+                    }
+                );
+
+                if (!response.ok) throw new Error('Failed to download activity log');
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `activity-log-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+
+            } catch (error) {
+                console.error('Error downloading activity log:', error);
+                alert(currentLang === 'en' ? 'Failed to download activity log' : 'Error al descargar registro de actividad');
+            }
+        }
+
+        function formatColor(color) {
+            const colorMap = {
+                'en': {
+                    'clear': 'Clear',
+                    'bronze': 'Bronze',
+                    'gray': 'Gray',
+                    'blue': 'Blue',
+                    'green': 'Green',
+                    'antique': 'Antique (Stained)',
+                    'mirror-clear': 'Mirror - Clear',
+                    'mirror-dark': 'Mirror - Dark'
+                },
+                'es': {
+                    'clear': 'Claro',
+                    'bronze': 'Bronce',
+                    'gray': 'Gris',
+                    'blue': 'Azul',
+                    'green': 'Verde',
+                    'antique': 'Antiguo (Manchado)',
+                    'mirror-clear': 'Espejo - Claro',
+                    'mirror-dark': 'Espejo - Oscuro'
+                }
+            };
+            return colorMap[currentLang][color] || color;
+        }
+
+        function formatAddition(addition) {
+            const additionMap = {
+                'en': {
+                    'diamon-fusion': 'Diamon-Fusion®',
+                    'diamond-fusion': 'Diamon-Fusion®',
+                    'tempering': 'Tempering',
+                    'sandblasting': 'Sandblasting',
+                    'beveling': 'Beveling',
+                    'edge-rounding': 'Edge Rounding'
+                },
+                'es': {
+                    'diamon-fusion': 'Diamon-Fusion®',
+                    'diamond-fusion': 'Diamon-Fusion®',
+                    'tempering': 'Templado',
+                    'sandblasting': 'Arenado',
+                    'beveling': 'Biselado',
+                    'edge-rounding': 'Redondeo de Bordes'
+                }
+            };
+            return additionMap[currentLang][addition] || addition;
+        }
+
+        function formatPaymentMethod(method) {
+            const methodMap = {
+                'en': {
+                    'credit-debit': 'Credit/Debit Card',
+                    'card': 'Card',
+                    'cash': 'Cash',
+                    'apple-google-ath': 'Apple Pay / Google Pay / ATH Móvil',
+                    'digital': 'Digital',
+                    'ath-movil': 'ATH Móvil'
+                },
+                'es': {
+                    'credit-debit': 'Tarjeta de Crédito/Débito',
+                    'card': 'Tarjeta',
+                    'cash': 'Efectivo',
+                    'apple-google-ath': 'Apple Pay / Google Pay / ATH Móvil',
+                    'digital': 'Digital',
+                    'ath-movil': 'ATH Móvil'
+                }
+            };
+            return methodMap[currentLang][method] || method;
+        }
+
+        // Initialize
+        updateLanguage();
+        loadOrders();
+        
+        setInterval(loadOrders, 30000);
+    </script>
+</body>
+</html>
