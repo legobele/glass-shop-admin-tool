@@ -664,6 +664,7 @@
         window.addEventListener('load', async function() {
             const token = getAuthToken();
             if (!token) {
+                console.log('no auth token found, redirecting to login...');
                 window.location.href = 'https://legobele.github.io/glass-shop-admin-login-page';
                 return;
             }
@@ -675,11 +676,13 @@
                 });
 
                 if (!response.ok) {
+                    console.log('auth verification failed, redirecting to login...');
                     logout();
                     return;
                 }
 
                 const data = await response.json();
+                console.log('auth verified successfully');
                 
                 // Display user info
                 const userInfo = localStorage.getItem('qgi-user');
@@ -687,8 +690,17 @@
                     const user = JSON.parse(userInfo);
                     document.getElementById('user-info').textContent = `👤 ${user.fullName || user.email}`;
                 }
+
+                // NOW load orders after auth is confirmed
+                console.log('loading orders...');
+                await loadOrders();
+                
+                // Set up auto-refresh
+                setInterval(loadOrders, 30000);
+                
             } catch (error) {
                 console.error('Auth verification failed:', error);
+                console.log('error during auth check, redirecting to login...');
                 logout();
             }
         });
@@ -946,8 +958,8 @@
 
         function createOrderCard(order) {
             const lang = translations[currentLang];
-            const statusClass = `status-${order.status}`;
-            const timestamp = new Date(order.timestamp).toLocaleString();
+            const statusClass = `status-${order.status || 'pending'}`;
+            const timestamp = new Date(order.timestamp || Date.now()).toLocaleString();
             
             const statusText = {
                 'pending': lang.pending,
@@ -955,17 +967,23 @@
                 'ready': lang.ready,
                 'completed': lang.completed,
                 'cancelled': lang.cancelled
-            }[order.status] || order.status;
+            }[order.status] || order.status || 'pending';
             
-            const additionsHTML = order.specifications.additions.length > 0
-                ? order.specifications.additions.map(add => `<span style="background: #667eea; color: white; padding: 3px 8px; border-radius: 10px; font-size: 0.75rem; margin-right: 5px;">${formatAddition(add)}</span>`).join('')
+            // defensive checks for missing data
+            const specs = order.specifications || {};
+            const dims = order.dimensions || {};
+            const additions = specs.additions || [];
+            const payment = order.payment || {};
+            
+            const additionsHTML = additions.length > 0
+                ? additions.map(add => `<span style="background: #667eea; color: white; padding: 3px 8px; border-radius: 10px; font-size: 0.75rem; margin-right: 5px;">${formatAddition(add)}</span>`).join('')
                 : `<span style="color: #6c757d;">${currentLang === 'en' ? 'None' : 'Ninguno'}</span>`;
 
             return `
                 <div class="order-card">
                     <div class="order-header">
                         <div>
-                            <div class="order-id">${order.orderId}</div>
+                            <div class="order-id">${order.orderId || 'N/A'}</div>
                             <div class="order-timestamp">${timestamp}</div>
                         </div>
                         <div class="status-badge ${statusClass}">${statusText}</div>
@@ -989,11 +1007,11 @@
                             <div class="info-title">${lang.dimensions}</div>
                             <div class="info-item">
                                 <span class="info-label">${lang.width}:</span>
-                                <span class="info-value">${order.dimensions.width}"</span>
+                                <span class="info-value">${dims.width || 'N/A'}"</span>
                             </div>
                             <div class="info-item">
                                 <span class="info-label">${lang.height}:</span>
-                                <span class="info-value">${order.dimensions.height}"</span>
+                                <span class="info-value">${dims.height || 'N/A'}"</span>
                             </div>
                         </div>
 
@@ -1001,11 +1019,11 @@
                             <div class="info-title">${lang.specifications}</div>
                             <div class="info-item">
                                 <span class="info-label">${lang.color}:</span>
-                                <span class="info-value">${formatColor(order.specifications.color)}</span>
+                                <span class="info-value">${formatColor(specs.color || 'N/A')}</span>
                             </div>
                             <div class="info-item">
                                 <span class="info-label">${lang.thickness}:</span>
-                                <span class="info-value">${order.specifications.thickness}</span>
+                                <span class="info-value">${specs.thickness || 'N/A'}</span>
                             </div>
                         </div>
 
@@ -1013,7 +1031,7 @@
                             <div class="info-title">${lang.paymentMethod}</div>
                             <div class="info-item">
                                 <span class="info-label">${currentLang === 'en' ? 'Method' : 'Método'}:</span>
-                                <span class="info-value">${formatPaymentMethod(order.payment.method)}</span>
+                                <span class="info-value">${formatPaymentMethod(payment.method || 'N/A')}</span>
                             </div>
                         </div>
                     </div>
@@ -1180,19 +1198,26 @@
         }
 
         function showEditForm() {
-            document.getElementById('editFormOrderId').textContent = currentEditOrder.orderId;
-            document.getElementById('editWidth').value = currentEditOrder.dimensions.width;
-            document.getElementById('editHeight').value = currentEditOrder.dimensions.height;
-            document.getElementById('editColor').value = currentEditOrder.specifications.color;
-            document.getElementById('editThickness').value = currentEditOrder.specifications.thickness;
+            document.getElementById('editFormOrderId').textContent = currentEditOrder.orderId || 'N/A';
             
-            document.getElementById('editDiamondFusion').checked = currentEditOrder.specifications.additions.includes('diamon-fusion') || currentEditOrder.specifications.additions.includes('diamond-fusion');
-            document.getElementById('editTempering').checked = currentEditOrder.specifications.additions.includes('tempering');
-            document.getElementById('editSandblasting').checked = currentEditOrder.specifications.additions.includes('sandblasting');
-            document.getElementById('editBeveling').checked = currentEditOrder.specifications.additions.includes('beveling');
-            document.getElementById('editEdgeRounding').checked = currentEditOrder.specifications.additions.includes('edge-rounding');
+            // defensive checks for missing data
+            const dims = currentEditOrder.dimensions || {};
+            const specs = currentEditOrder.specifications || {};
+            const additions = specs.additions || [];
+            const payment = currentEditOrder.payment || {};
             
-            document.getElementById('editPayment').value = currentEditOrder.payment.method;
+            document.getElementById('editWidth').value = dims.width || '';
+            document.getElementById('editHeight').value = dims.height || '';
+            document.getElementById('editColor').value = specs.color || '';
+            document.getElementById('editThickness').value = specs.thickness || '';
+            
+            document.getElementById('editDiamondFusion').checked = additions.includes('diamon-fusion') || additions.includes('diamond-fusion');
+            document.getElementById('editTempering').checked = additions.includes('tempering');
+            document.getElementById('editSandblasting').checked = additions.includes('sandblasting');
+            document.getElementById('editBeveling').checked = additions.includes('beveling');
+            document.getElementById('editEdgeRounding').checked = additions.includes('edge-rounding');
+            
+            document.getElementById('editPayment').value = payment.method || '';
             
             document.getElementById('editFormModal').classList.add('active');
         }
@@ -1392,9 +1417,8 @@
 
         // Initialize
         updateLanguage();
-        loadOrders();
-        
-        setInterval(loadOrders, 30000);
+        // loadOrders() is now called after auth verification in the load event listener
+        // setInterval is also set up there
 
         // ============================================================
         // EASTER EGGS - because why the fuck not
