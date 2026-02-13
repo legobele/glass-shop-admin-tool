@@ -29,7 +29,6 @@
     max-height: 95vh;
     display: flex;
     flex-direction: column;
-    zoom: 0.9;
 }
 
         .header {
@@ -175,6 +174,7 @@
     max-height: calc(95vh - 100px);  /* subtract header + stats + controls height */
     overflow-y: auto; /* WHAT THE FUCK IS AN OVERFLOW */
     flex: 1;  /* take remaining space */
+    zoom: 0.9;  /* make this run properly */
 }
 
         .order-card {
