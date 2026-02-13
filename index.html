@@ -1395,6 +1395,408 @@
         loadOrders();
         
         setInterval(loadOrders, 30000);
+
+        // ============================================================
+        // EASTER EGGS - because why the fuck not
+        // ============================================================
+        
+        // accessibility settings state
+        let accessibilitySettings = {
+            highContrast: false,
+            reducedMotion: false,
+            colorTone: 'default', // default, warm, cool, monochrome
+            fontSize: 'default', // default, large, xlarge
+            focusIndicators: false
+        };
+
+        // autism-friendly mode state
+        let autismMode = false;
+
+        window.MakeMeAccessible = function() {
+            const existingMenu = document.getElementById('accessibility-menu');
+            if (existingMenu) {
+                existingMenu.remove();
+                return;
+            }
+
+            const menu = document.createElement('div');
+            menu.id = 'accessibility-menu';
+            menu.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: white;
+                padding: 30px;
+                border-radius: 15px;
+                box-shadow: 0 10px 50px rgba(0,0,0,0.3);
+                z-index: 10000;
+                max-width: 500px;
+                width: 90%;
+                max-height: 80vh;
+                overflow-y: auto;
+            `;
+
+            menu.innerHTML = `
+                <div style="margin-bottom: 20px;">
+                    <h2 style="margin: 0 0 10px 0; color: #2c3e50;">accessibility settings</h2>
+                    <p style="margin: 0; color: #7f8c8d; font-size: 0.9rem;">make this tool work better for you</p>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 10px; background: #f8f9fa; border-radius: 8px;">
+                        <input type="checkbox" id="high-contrast-toggle" ${accessibilitySettings.highContrast ? 'checked' : ''} style="width: 20px; height: 20px;">
+                        <div>
+                            <strong style="display: block; color: #2c3e50;">high contrast mode</strong>
+                            <span style="font-size: 0.85rem; color: #7f8c8d;">makes text easier to read</span>
+                        </div>
+                    </label>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 10px; background: #f8f9fa; border-radius: 8px;">
+                        <input type="checkbox" id="reduced-motion-toggle" ${accessibilitySettings.reducedMotion ? 'checked' : ''} style="width: 20px; height: 20px;">
+                        <div>
+                            <strong style="display: block; color: #2c3e50;">reduce motion</strong>
+                            <span style="font-size: 0.85rem; color: #7f8c8d;">removes animations and transitions</span>
+                        </div>
+                    </label>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 10px; background: #f8f9fa; border-radius: 8px;">
+                        <input type="checkbox" id="focus-indicators-toggle" ${accessibilitySettings.focusIndicators ? 'checked' : ''} style="width: 20px; height: 20px;">
+                        <div>
+                            <strong style="display: block; color: #2c3e50;">enhanced focus indicators</strong>
+                            <span style="font-size: 0.85rem; color: #7f8c8d;">shows where keyboard focus is</span>
+                        </div>
+                    </label>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; color: #2c3e50; font-weight: 600;">color tone</label>
+                    <select id="color-tone-select" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;">
+                        <option value="default" ${accessibilitySettings.colorTone === 'default' ? 'selected' : ''}>default (red/dark)</option>
+                        <option value="warm" ${accessibilitySettings.colorTone === 'warm' ? 'selected' : ''}>warm (orange/brown)</option>
+                        <option value="cool" ${accessibilitySettings.colorTone === 'cool' ? 'selected' : ''}>cool (blue/teal)</option>
+                        <option value="monochrome" ${accessibilitySettings.colorTone === 'monochrome' ? 'selected' : ''}>monochrome (grayscale)</option>
+                    </select>
+                    <span style="font-size: 0.85rem; color: #7f8c8d; display: block; margin-top: 5px;">because bright colors can be overwhelming af</span>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; color: #2c3e50; font-weight: 600;">font size</label>
+                    <select id="font-size-select" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;">
+                        <option value="default" ${accessibilitySettings.fontSize === 'default' ? 'selected' : ''}>default</option>
+                        <option value="large" ${accessibilitySettings.fontSize === 'large' ? 'selected' : ''}>large (+20%)</option>
+                        <option value="xlarge" ${accessibilitySettings.fontSize === 'xlarge' ? 'selected' : ''}>extra large (+40%)</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button id="apply-accessibility" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">apply settings</button>
+                    <button id="close-accessibility" style="flex: 1; padding: 12px; background: #ecf0f1; color: #2c3e50; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">close</button>
+                </div>
+            `;
+
+            document.body.appendChild(menu);
+
+            // event listeners for the menu
+            document.getElementById('apply-accessibility').onclick = function() {
+                accessibilitySettings.highContrast = document.getElementById('high-contrast-toggle').checked;
+                accessibilitySettings.reducedMotion = document.getElementById('reduced-motion-toggle').checked;
+                accessibilitySettings.focusIndicators = document.getElementById('focus-indicators-toggle').checked;
+                accessibilitySettings.colorTone = document.getElementById('color-tone-select').value;
+                accessibilitySettings.fontSize = document.getElementById('font-size-select').value;
+                
+                applyAccessibilitySettings();
+                menu.remove();
+            };
+
+            document.getElementById('close-accessibility').onclick = function() {
+                menu.remove();
+            };
+
+            console.log('accessibility menu opened - customize away!');
+        };
+
+        function applyAccessibilitySettings() {
+            let styleId = 'accessibility-overrides';
+            let existingStyle = document.getElementById(styleId);
+            if (existingStyle) existingStyle.remove();
+
+            let css = '';
+
+            // high contrast
+            if (accessibilitySettings.highContrast) {
+                css += `
+                    body { filter: contrast(1.3); }
+                    .order-card { border: 2px solid #000 !important; }
+                    .stat-card { border: 2px solid #000 !important; }
+                `;
+            }
+
+            // reduced motion
+            if (accessibilitySettings.reducedMotion) {
+                css += `
+                    *, *::before, *::after {
+                        animation-duration: 0.01ms !important;
+                        animation-iteration-count: 1 !important;
+                        transition-duration: 0.01ms !important;
+                    }
+                `;
+            }
+
+            // focus indicators
+            if (accessibilitySettings.focusIndicators) {
+                css += `
+                    *:focus {
+                        outline: 3px solid #e74c3c !important;
+                        outline-offset: 2px !important;
+                    }
+                `;
+            }
+
+            // color tones
+            if (accessibilitySettings.colorTone === 'warm') {
+                css += `
+                    .header { background: linear-gradient(135deg, #d35400, #e67e22) !important; }
+                    body { background: linear-gradient(135deg, #34495e 0%, #5d4037 100%) !important; }
+                    .btn-primary { background: linear-gradient(135deg, #d35400, #e67e22) !important; }
+                `;
+            } else if (accessibilitySettings.colorTone === 'cool') {
+                css += `
+                    .header { background: linear-gradient(135deg, #2980b9, #3498db) !important; }
+                    body { background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important; }
+                    .btn-primary { background: linear-gradient(135deg, #2980b9, #3498db) !important; }
+                `;
+            } else if (accessibilitySettings.colorTone === 'monochrome') {
+                css += `
+                    * { filter: grayscale(100%) !important; }
+                `;
+            }
+
+            // font size
+            if (accessibilitySettings.fontSize === 'large') {
+                css += `
+                    body { font-size: 120% !important; }
+                `;
+            } else if (accessibilitySettings.fontSize === 'xlarge') {
+                css += `
+                    body { font-size: 140% !important; }
+                `;
+            }
+
+            if (css) {
+                const style = document.createElement('style');
+                style.id = styleId;
+                style.textContent = css;
+                document.head.appendChild(style);
+            }
+
+            console.log('accessibility settings applied:', accessibilitySettings);
+        }
+
+        window.autismify = function() {
+            if (autismMode) {
+                // turn it off
+                autismMode = false;
+                const styleTag = document.getElementById('autism-mode-styles');
+                if (styleTag) styleTag.remove();
+                console.log('autism mode disabled - back to neurotypical mode (boring)');
+                return;
+            }
+
+            autismMode = true;
+            console.log('autism mode activated - get ready for sensory-friendly vibes');
+
+            const autismStyles = document.createElement('style');
+            autismStyles.id = 'autism-mode-styles';
+            autismStyles.textContent = `
+                /* ============================================================
+                   AUTISM MODE - sensory-friendly interface
+                   ============================================================ */
+                
+                /* soft, muted color palette - no bright aggressive colors */
+                body {
+                    background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%) !important;
+                    font-family: 'Comic Sans MS', 'Segoe UI', sans-serif !important;
+                }
+
+                .header {
+                    background: linear-gradient(135deg, #5a67d8, #667eea) !important;
+                    animation: none !important;
+                }
+
+                /* reduce all motion - animations can be overwhelming */
+                *, *::before, *::after {
+                    animation-duration: 0.01ms !important;
+                    animation-iteration-count: 1 !important;
+                    transition-duration: 0.01ms !important;
+                    scroll-behavior: auto !important;
+                }
+
+                /* enhanced focus indicators - always know where you are */
+                *:focus {
+                    outline: 4px solid #fbbf24 !important;
+                    outline-offset: 3px !important;
+                    box-shadow: 0 0 0 8px rgba(251, 191, 36, 0.2) !important;
+                }
+
+                /* softer shadows - less visual noise */
+                .dashboard-container,
+                .stat-card,
+                .order-card {
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+                }
+
+                /* predictable button states */
+                .header-btn,
+                .lang-toggle,
+                .btn-primary,
+                .refresh-btn {
+                    transition: none !important;
+                    position: relative !important;
+                }
+
+                .header-btn:hover,
+                .lang-toggle:hover,
+                .btn-primary:hover,
+                .refresh-btn:hover {
+                    transform: none !important;
+                    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.4) !important;
+                }
+
+                /* clearer visual hierarchy */
+                .stat-card {
+                    border: 2px solid #cbd5e0 !important;
+                    background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%) !important;
+                }
+
+                .order-card {
+                    border-left: 4px solid #5a67d8 !important;
+                }
+
+                /* status badges with better contrast */
+                .status-badge {
+                    font-weight: 700 !important;
+                    padding: 6px 14px !important;
+                    border: 2px solid currentColor !important;
+                }
+
+                /* increased spacing - less crowded */
+                .stat-card {
+                    padding: 25px !important;
+                }
+
+                .order-card {
+                    padding: 25px !important;
+                    margin-bottom: 18px !important;
+                }
+
+                /* comforting rounded corners everywhere */
+                .header-btn,
+                .lang-toggle,
+                .refresh-btn,
+                .btn-primary,
+                .status-badge {
+                    border-radius: 12px !important;
+                }
+
+                /* readable text with good contrast */
+                .stat-value {
+                    color: #1a202c !important;
+                    font-weight: 700 !important;
+                }
+
+                .stat-label {
+                    color: #4a5568 !important;
+                    font-weight: 600 !important;
+                }
+
+                /* subtle background patterns for texture */
+                .dashboard-container {
+                    background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%) !important;
+                }
+
+                /* emoji indicators for quick scanning */
+                .stat-card::before {
+                    content: '📊';
+                    font-size: 2rem;
+                    display: block;
+                    margin-bottom: 10px;
+                }
+
+                .order-card::before {
+                    content: '📦';
+                    font-size: 1.5rem;
+                    margin-right: 10px;
+                    display: inline-block;
+                }
+
+                /* loading states are clear and non-distracting */
+                @keyframes gentle-pulse {
+                    0%, 100% { opacity: 0.6; }
+                    50% { opacity: 1; }
+                }
+
+                .loading {
+                    animation: gentle-pulse 2s ease-in-out infinite !important;
+                }
+
+                /* consistent spacing rhythm */
+                .stats-grid {
+                    gap: 25px !important;
+                    padding: 25px 35px !important;
+                }
+
+                .orders-section {
+                    padding: 25px 35px !important;
+                }
+
+                /* high contrast text */
+                body {
+                    filter: contrast(1.1) !important;
+                }
+
+                /* comfort mode engaged message */
+                body::after {
+                    content: '🌟 autism mode active - sensory-friendly interface enabled';
+                    position: fixed;
+                    bottom: 20px;
+                    right: 20px;
+                    background: #5a67d8;
+                    color: white;
+                    padding: 12px 20px;
+                    border-radius: 12px;
+                    font-size: 0.9rem;
+                    font-weight: 600;
+                    box-shadow: 0 4px 12px rgba(90, 103, 216, 0.3);
+                    z-index: 9999;
+                    animation: gentle-pulse 3s ease-in-out infinite;
+                }
+            `;
+
+            document.head.appendChild(autismStyles);
+            console.log('🌟 interface transformed:');
+            console.log('- reduced motion ✓');
+            console.log('- softer colors ✓');
+            console.log('- enhanced focus indicators ✓');
+            console.log('- predictable interactions ✓');
+            console.log('- increased spacing ✓');
+            console.log('- better contrast ✓');
+            console.log('run window.autismify() again to toggle off');
+        };
+
+        // expose accessibility settings to console
+        window.getAccessibilitySettings = function() {
+            return accessibilitySettings;
+        };
+
+        // quick console hint
+        console.log('%c🎨 easter eggs available:', 'font-size: 16px; font-weight: bold; color: #e74c3c;');
+        console.log('%cwindow.autismify() - autism-friendly UI mode', 'font-size: 14px; color: #5a67d8;');
+        console.log('%cwindow.MakeMeAccessible() - full accessibility settings', 'font-size: 14px; color: #2980b9;');
     </script>
 </body>
 </html>
