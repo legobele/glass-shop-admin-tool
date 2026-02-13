@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=0.9">
-    <title>QGI Admin Dashboard v0.6</title>
+    <title>QGI Admin Dashboard v0.7-access</title>
     <style>
         * {
             max-height: 100vh;
@@ -430,6 +430,87 @@
             background: #d5dbdb;
         }
 
+        .status-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .status-option {
+            padding: 15px 20px;
+            border: 2px solid #e0e6ed;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-option:hover {
+            background: #f8f9fa;
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .status-option.selected {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .status-option[data-status="pending"] {
+            border-left: 4px solid #fdcb6e;
+        }
+
+        .status-option[data-status="in-progress"] {
+            border-left: 4px solid #0984e3;
+        }
+
+        .status-option[data-status="ready"] {
+            border-left: 4px solid #00b894;
+        }
+
+        .status-option[data-status="completed"] {
+            border-left: 4px solid #6c757d;
+        }
+
+        .status-option[data-status="cancelled"] {
+            border-left: 4px solid #e84393;
+        }
+
+        /* accessibility button styling */
+        .accessibility-fab {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            z-index: 9998;
+            border: none;
+            transition: all 0.3s ease;
+            font-size: 1.5rem;
+        }
+
+        .accessibility-fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .accessibility-fab:focus {
+            outline: 3px solid #fbbf24;
+            outline-offset: 3px;
+        }
+
         .modal-title {
             font-size: clamp(1.3rem, 3vw, 1.8rem);
             color: #2c3e50;
@@ -440,38 +521,38 @@
      …</style>
 </head>
 <body>
-    <div class="dashboard-container">
-        <div class="header">
+    <div class="dashboard-container" role="main" aria-label="Admin Dashboard">
+        <header class="header" role="banner">
             <div class="header-left">
-                <div class="logo">QGI Admin Dashboard</div>
-                <div class="subtitle" data-i18n="subtitle">Sales Team Portal v0.4</div>
+                <h1 class="logo">QGI Admin Dashboard</h1>
+                <p class="subtitle" data-i18n="subtitle">Sales Team Portal v0.7-access</p>
             </div>
-            <div class="header-actions">
-                <span id="user-info" style="margin-right: 15px; opacity: 0.9;"></span>
-                <button class="lang-toggle" onclick="toggleLanguage()" id="langToggle">🌐 ES</button>
-                <button class="header-btn" onclick="window.location.href='https://legobele.github.io/glass-shop-admin-tool-acc-settings'">
+            <nav class="header-actions" role="navigation" aria-label="Main navigation">
+                <span id="user-info" style="margin-right: 15px; opacity: 0.9;" aria-live="polite"></span>
+                <button class="lang-toggle" onclick="toggleLanguage()" id="langToggle" aria-label="Switch language to Spanish">🌐 ES</button>
+                <button class="header-btn" onclick="window.location.href='https://legobele.github.io/glass-shop-admin-tool-acc-settings'" aria-label="Settings">
                     <span>⚙️ Settings</span>
                 </button>
-                <button class="header-btn" onclick="downloadActivityLog()">
+                <button class="header-btn" onclick="downloadActivityLog()" aria-label="Download activity log">
                     <span data-i18n="downloadLog">📥 Download Activity Log</span>
                 </button>
-                <button class="header-btn" onclick="loadOrders()">
+                <button class="header-btn" onclick="loadOrders()" aria-label="Refresh orders">
                     <span data-i18n="refresh">🔄 Refresh</span>
                 </button>
-                <button class="header-btn" onclick="logout()" style="background: rgba(255,100,100,0.3);">
+                <button class="header-btn" onclick="logout()" style="background: rgba(255,100,100,0.3);" aria-label="Logout">
                     <span>🚪 Logout</span>
                 </button>
-            </div>
-        </div>
+            </nav>
+        </header>
 
-        <div class="stats-grid" id="statsGrid">
+        <section class="stats-grid" id="statsGrid" role="region" aria-label="Order statistics">
             <!-- Stats will be populated here -->
-        </div>
+        </section>
 
-        <div class="controls">
+        <div class="controls" role="search" aria-label="Order filters">
             <div class="filter-group">
-                <label data-i18n="filterLabel">Filter by status:</label>
-                <select class="filter-select" id="statusFilter" onchange="filterOrders()">
+                <label for="statusFilter" data-i18n="filterLabel">Filter by status:</label>
+                <select class="filter-select" id="statusFilter" onchange="filterOrders()" aria-label="Filter orders by status">
                     <option value="all" data-i18n="allOrders">All Orders</option>
                     <option value="pending" data-i18n="pending">Pending</option>
                     <option value="in-progress" data-i18n="inProgress">In Progress</option>
@@ -480,39 +561,39 @@
                     <option value="cancelled" data-i18n="cancelled">Cancelled</option>
                 </select>
             </div>
-            <button class="refresh-btn" onclick="loadOrders()">
+            <button class="refresh-btn" onclick="loadOrders()" aria-label="Refresh order list">
                 <span data-i18n="refreshOrders">Refresh Orders</span>
             </button>
         </div>
 
-        <div class="orders-container" id="ordersContainer">
+        <section class="orders-container" id="ordersContainer" role="region" aria-label="Orders list" aria-live="polite">
             <!-- Orders will be populated here -->
-        </div>
+        </section>
     </div>
 
     <!-- Status Change Modal -->
-    <div class="modal" id="statusModal">
+    <div class="modal" id="statusModal" role="dialog" aria-modal="true" aria-labelledby="statusModalTitle">
         <div class="modal-content">
-            <h2 class="modal-title" data-i18n="changeStatus">Change Order Status</h2>
+            <h2 class="modal-title" id="statusModalTitle" data-i18n="changeStatus">Change Order Status</h2>
             <p class="modal-description">
                 <span data-i18n="updateStatusDesc">Update the status of order</span> 
                 <strong id="statusModalOrderId"></strong>
             </p>
 
-            <div class="status-selector" id="statusSelector">
-                <div class="status-option" data-status="pending">
+            <div class="status-selector" id="statusSelector" role="radiogroup" aria-label="Select new order status">
+                <div class="status-option" data-status="pending" role="radio" aria-checked="false" tabindex="0">
                     <span data-i18n="statusPending">⏳ Pending</span>
                 </div>
-                <div class="status-option" data-status="in-progress">
+                <div class="status-option" data-status="in-progress" role="radio" aria-checked="false" tabindex="-1">
                     <span data-i18n="statusInProgress">🔧 In Progress</span>
                 </div>
-                <div class="status-option" data-status="ready">
+                <div class="status-option" data-status="ready" role="radio" aria-checked="false" tabindex="-1">
                     <span data-i18n="statusReady">✅ Ready</span>
                 </div>
-                <div class="status-option" data-status="completed">
+                <div class="status-option" data-status="completed" role="radio" aria-checked="false" tabindex="-1">
                     <span data-i18n="statusCompleted">📦 Completed</span>
                 </div>
-                <div class="status-option" data-status="cancelled">
+                <div class="status-option" data-status="cancelled" role="radio" aria-checked="false" tabindex="-1">
                     <span data-i18n="statusCancelled">❌ Cancelled</span>
                 </div>
             </div>
@@ -656,6 +737,11 @@
             <div class="error-message" id="editFormError"></div>
         </div>
     </div>
+
+    <!-- Accessibility Floating Action Button -->
+    <button class="accessibility-fab" onclick="window.MakeMeAccessible()" aria-label="Open accessibility settings" title="Accessibility Settings">
+        ♿
+    </button>
 
     <script>
         const SERVER_CONFIG = {
@@ -1143,11 +1229,45 @@
         }
 
         document.addEventListener('click', function(e) {
-            if (e.target.classList.contains('status-option')) {
-                document.querySelectorAll('.status-option').forEach(opt => opt.classList.remove('selected'));
-                e.target.classList.add('selected');
-                selectedStatus = e.target.dataset.status;
+            if (e.target.classList.contains('status-option') || e.target.parentElement.classList.contains('status-option')) {
+                const option = e.target.classList.contains('status-option') ? e.target : e.target.parentElement;
+                document.querySelectorAll('.status-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                    opt.setAttribute('aria-checked', 'false');
+                    opt.setAttribute('tabindex', '-1');
+                });
+                option.classList.add('selected');
+                option.setAttribute('aria-checked', 'true');
+                option.setAttribute('tabindex', '0');
+                selectedStatus = option.dataset.status;
             }
+        });
+
+        // keyboard navigation for status options (ARIA radio pattern)
+        document.addEventListener('keydown', function(e) {
+            const focused = document.activeElement;
+            if (!focused.classList.contains('status-option')) return;
+
+            const options = Array.from(document.querySelectorAll('.status-option'));
+            const currentIndex = options.indexOf(focused);
+
+            let nextIndex = currentIndex;
+            
+            if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+                e.preventDefault();
+                nextIndex = (currentIndex + 1) % options.length;
+            } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                e.preventDefault();
+                nextIndex = (currentIndex - 1 + options.length) % options.length;
+            } else if (e.key === ' ' || e.key === 'Enter') {
+                e.preventDefault();
+                focused.click();
+                return;
+            } else {
+                return;
+            }
+
+            options[nextIndex].focus();
         });
 
         async function updateStatus() {
@@ -1500,6 +1620,9 @@
 
             const menu = document.createElement('div');
             menu.id = 'accessibility-menu';
+            menu.setAttribute('role', 'dialog');
+            menu.setAttribute('aria-modal', 'true');
+            menu.setAttribute('aria-labelledby', 'accessibility-title');
             menu.style.cssText = `
                 position: fixed;
                 top: 50%;
@@ -1518,13 +1641,13 @@
 
             menu.innerHTML = `
                 <div style="margin-bottom: 20px;">
-                    <h2 style="margin: 0 0 10px 0; color: #2c3e50;">accessibility settings</h2>
+                    <h2 id="accessibility-title" style="margin: 0 0 10px 0; color: #2c3e50;">accessibility settings</h2>
                     <p style="margin: 0; color: #7f8c8d; font-size: 0.9rem;">make this tool work better for you</p>
                 </div>
 
                 <div style="margin-bottom: 20px;">
                     <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 10px; background: #f8f9fa; border-radius: 8px;">
-                        <input type="checkbox" id="high-contrast-toggle" ${accessibilitySettings.highContrast ? 'checked' : ''} style="width: 20px; height: 20px;">
+                        <input type="checkbox" id="high-contrast-toggle" ${accessibilitySettings.highContrast ? 'checked' : ''} style="width: 20px; height: 20px;" aria-label="Enable high contrast mode">
                         <div>
                             <strong style="display: block; color: #2c3e50;">high contrast mode</strong>
                             <span style="font-size: 0.85rem; color: #7f8c8d;">makes text easier to read</span>
@@ -1534,7 +1657,7 @@
 
                 <div style="margin-bottom: 20px;">
                     <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 10px; background: #f8f9fa; border-radius: 8px;">
-                        <input type="checkbox" id="reduced-motion-toggle" ${accessibilitySettings.reducedMotion ? 'checked' : ''} style="width: 20px; height: 20px;">
+                        <input type="checkbox" id="reduced-motion-toggle" ${accessibilitySettings.reducedMotion ? 'checked' : ''} style="width: 20px; height: 20px;" aria-label="Reduce motion and animations">
                         <div>
                             <strong style="display: block; color: #2c3e50;">reduce motion</strong>
                             <span style="font-size: 0.85rem; color: #7f8c8d;">removes animations and transitions</span>
@@ -1544,7 +1667,7 @@
 
                 <div style="margin-bottom: 20px;">
                     <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 10px; background: #f8f9fa; border-radius: 8px;">
-                        <input type="checkbox" id="focus-indicators-toggle" ${accessibilitySettings.focusIndicators ? 'checked' : ''} style="width: 20px; height: 20px;">
+                        <input type="checkbox" id="focus-indicators-toggle" ${accessibilitySettings.focusIndicators ? 'checked' : ''} style="width: 20px; height: 20px;" aria-label="Show enhanced focus indicators">
                         <div>
                             <strong style="display: block; color: #2c3e50;">enhanced focus indicators</strong>
                             <span style="font-size: 0.85rem; color: #7f8c8d;">shows where keyboard focus is</span>
@@ -1553,8 +1676,8 @@
                 </div>
 
                 <div style="margin-bottom: 20px;">
-                    <label style="display: block; margin-bottom: 8px; color: #2c3e50; font-weight: 600;">color tone</label>
-                    <select id="color-tone-select" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;">
+                    <label for="color-tone-select" style="display: block; margin-bottom: 8px; color: #2c3e50; font-weight: 600;">color tone</label>
+                    <select id="color-tone-select" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;" aria-label="Choose color scheme">
                         <option value="default" ${accessibilitySettings.colorTone === 'default' ? 'selected' : ''}>default (red/dark)</option>
                         <option value="warm" ${accessibilitySettings.colorTone === 'warm' ? 'selected' : ''}>warm (orange/brown)</option>
                         <option value="cool" ${accessibilitySettings.colorTone === 'cool' ? 'selected' : ''}>cool (blue/teal)</option>
@@ -1564,8 +1687,8 @@
                 </div>
 
                 <div style="margin-bottom: 20px;">
-                    <label style="display: block; margin-bottom: 8px; color: #2c3e50; font-weight: 600;">font size</label>
-                    <select id="font-size-select" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;">
+                    <label for="font-size-select" style="display: block; margin-bottom: 8px; color: #2c3e50; font-weight: 600;">font size</label>
+                    <select id="font-size-select" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;" aria-label="Choose font size">
                         <option value="default" ${accessibilitySettings.fontSize === 'default' ? 'selected' : ''}>default</option>
                         <option value="large" ${accessibilitySettings.fontSize === 'large' ? 'selected' : ''}>large (+20%)</option>
                         <option value="xlarge" ${accessibilitySettings.fontSize === 'xlarge' ? 'selected' : ''}>extra large (+40%)</option>
@@ -1573,12 +1696,33 @@
                 </div>
 
                 <div style="display: flex; gap: 10px;">
-                    <button id="apply-accessibility" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">apply settings</button>
-                    <button id="close-accessibility" style="flex: 1; padding: 12px; background: #ecf0f1; color: #2c3e50; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">close</button>
+                    <button id="apply-accessibility" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;" aria-label="Apply accessibility settings">apply settings</button>
+                    <button id="close-accessibility" style="flex: 1; padding: 12px; background: #ecf0f1; color: #2c3e50; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;" aria-label="Close accessibility menu">close</button>
                 </div>
             `;
 
             document.body.appendChild(menu);
+
+            // focus trap for accessibility
+            const focusableElements = menu.querySelectorAll('input, select, button');
+            const firstFocusable = focusableElements[0];
+            const lastFocusable = focusableElements[focusableElements.length - 1];
+            
+            firstFocusable.focus();
+
+            menu.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    menu.remove();
+                } else if (e.key === 'Tab') {
+                    if (e.shiftKey && document.activeElement === firstFocusable) {
+                        e.preventDefault();
+                        lastFocusable.focus();
+                    } else if (!e.shiftKey && document.activeElement === lastFocusable) {
+                        e.preventDefault();
+                        firstFocusable.focus();
+                    }
+                }
+            });
 
             // event listeners for the menu
             document.getElementById('apply-accessibility').onclick = function() {
@@ -1590,6 +1734,15 @@
                 
                 applyAccessibilitySettings();
                 menu.remove();
+                
+                // announce to screen readers
+                const announcement = document.createElement('div');
+                announcement.setAttribute('role', 'status');
+                announcement.setAttribute('aria-live', 'polite');
+                announcement.style.cssText = 'position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden;';
+                announcement.textContent = 'Accessibility settings applied successfully';
+                document.body.appendChild(announcement);
+                setTimeout(() => announcement.remove(), 1000);
             };
 
             document.getElementById('close-accessibility').onclick = function() {
