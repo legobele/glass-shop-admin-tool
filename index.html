@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=0.9">
-    <title>QGI Admin Dashboard v0.7-access</title>
+    <title>QGI Admin Dashboard v0.7</title>
     <style>
         * {
             max-height: 100vh;
@@ -146,6 +146,40 @@
             display: flex;
             gap: 10px;
             align-items: center;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 8px 40px 8px 12px;
+            border: 2px solid #e0e6ed;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #e74c3c;
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+        }
+
+        .search-input::placeholder {
+            color: #95a5a6;
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #95a5a6;
+            pointer-events: none;
         }
 
         .filter-select {
@@ -430,6 +464,37 @@
             background: #d5dbdb;
         }
 
+        .pin-input-section {
+            margin: 20px 0;
+        }
+
+        .pin-input-section h4 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .pin-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e6ed;
+            border-radius: 10px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            letter-spacing: 0.3em;
+            transition: all 0.3s ease;
+        }
+
+        .pin-input:focus {
+            outline: none;
+            border-color: #e74c3c;
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+        }
+
+        .pin-input::placeholder {
+            opacity: 0.4;
+        }
+
         .status-selector {
             display: flex;
             flex-direction: column;
@@ -525,7 +590,7 @@
         <header class="header" role="banner">
             <div class="header-left">
                 <h1 class="logo">QGI Admin Dashboard</h1>
-                <p class="subtitle" data-i18n="subtitle">Sales Team Portal v0.7-access</p>
+                <p class="subtitle" data-i18n="subtitle">Sales Team Portal v0.7</p>
             </div>
             <nav class="header-actions" role="navigation" aria-label="Main navigation">
                 <span id="user-info" style="margin-right: 15px; opacity: 0.9;" aria-live="polite"></span>
@@ -550,6 +615,17 @@
         </section>
 
         <div class="controls" role="search" aria-label="Order filters">
+            <div class="search-box">
+                <input 
+                    type="text" 
+                    class="search-input" 
+                    id="searchInput" 
+                    placeholder="Search by Order ID, Customer Name, or Customer ID..." 
+                    oninput="searchOrders()"
+                    aria-label="Search orders"
+                >
+                <span class="search-icon">🔍</span>
+            </div>
             <div class="filter-group">
                 <label for="statusFilter" data-i18n="filterLabel">Filter by status:</label>
                 <select class="filter-select" id="statusFilter" onchange="filterOrders()" aria-label="Filter orders by status">
@@ -1047,23 +1123,65 @@
         }
 
         function filterOrders() {
-            const filter = document.getElementById('statusFilter').value;
+            // just call searchOrders which handles both filtering and searching
+            searchOrders();
+        }
+
+        function searchOrders() {
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+            const statusFilter = document.getElementById('statusFilter').value;
             
-            // filter out completely invalid orders (missing orderId or critical fields)
+            // start with valid orders
             const validOrders = allOrders.filter(order => {
-                // must have an orderId
                 if (!order.orderId || order.orderId === 'N/A') return false;
-                // must have at least some data structure
                 if (!order.dimensions && !order.specifications) return false;
                 return true;
             });
             
-            let filteredOrders = filter === 'all' 
+            // apply status filter first
+            let filteredOrders = statusFilter === 'all' 
                 ? validOrders 
-                : validOrders.filter(o => o.status === filter);
-
+                : validOrders.filter(o => o.status === statusFilter);
+            
+            // if there's a search query, filter by it
+            if (searchQuery) {
+                filteredOrders = filteredOrders.filter(order => {
+                    // search in order ID
+                    if (order.orderId && order.orderId.toLowerCase().includes(searchQuery)) {
+                        return true;
+                    }
+                    
+                    // search in customer name
+                    if (order.customerName && order.customerName.toLowerCase().includes(searchQuery)) {
+                        return true;
+                    }
+                    
+                    // search in customer ID
+                    if (order.customerId && order.customerId.toLowerCase().includes(searchQuery)) {
+                        return true;
+                    }
+                    
+                    // search in dimensions (width x height)
+                    if (order.dimensions) {
+                        const dimString = `${order.dimensions.width}x${order.dimensions.height}`.toLowerCase();
+                        if (dimString.includes(searchQuery)) return true;
+                    }
+                    
+                    // search in specifications (color, thickness)
+                    if (order.specifications) {
+                        if (order.specifications.color && order.specifications.color.toLowerCase().includes(searchQuery)) {
+                            return true;
+                        }
+                        if (order.specifications.thickness && order.specifications.thickness.toLowerCase().includes(searchQuery)) {
+                            return true;
+                        }
+                    }
+                    
+                    return false;
+                });
+            }
+            
             filteredOrders.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
             displayOrders(filteredOrders);
         }
 
