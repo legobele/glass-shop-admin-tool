@@ -1597,7 +1597,9 @@
             console.log('accessibility settings applied:', accessibilitySettings);
         }
 
-        window.autismify = function() {
+        window.autismify = function(options = {}) {
+            const useComicSans = options.comicSans !== false; // default true unless explicitly false
+            
             if (autismMode) {
                 // turn it off
                 autismMode = false;
@@ -1609,6 +1611,13 @@
 
             autismMode = true;
             console.log('autism mode activated - get ready for sensory-friendly vibes');
+            if (!useComicSans) {
+                console.log('(sans comic sans, because that can also be sensory hell)');
+            }
+
+            const fontFamily = useComicSans 
+                ? "'Comic Sans MS', 'Segoe UI', sans-serif" 
+                : "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
 
             const autismStyles = document.createElement('style');
             autismStyles.id = 'autism-mode-styles';
@@ -1620,7 +1629,7 @@
                 /* soft, muted color palette - no bright aggressive colors */
                 body {
                     background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%) !important;
-                    font-family: 'Comic Sans MS', 'Segoe UI', sans-serif !important;
+                    font-family: ${fontFamily} !important;
                 }
 
                 .header {
@@ -1758,26 +1767,36 @@
                 body {
                     filter: contrast(1.1) !important;
                 }
-
-                /* comfort mode engaged message */
-                body::after {
-                    content: '🌟 autism mode active - sensory-friendly interface enabled';
-                    position: fixed;
-                    bottom: 20px;
-                    right: 20px;
-                    background: #5a67d8;
-                    color: white;
-                    padding: 12px 20px;
-                    border-radius: 12px;
-                    font-size: 0.9rem;
-                    font-weight: 600;
-                    box-shadow: 0 4px 12px rgba(90, 103, 216, 0.3);
-                    z-index: 9999;
-                    animation: gentle-pulse 3s ease-in-out infinite;
-                }
             `;
 
             document.head.appendChild(autismStyles);
+            
+            // show a brief notification that fades away instead of permanent badge
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: #5a67d8;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 12px;
+                font-size: 0.9rem;
+                font-weight: 600;
+                box-shadow: 0 4px 12px rgba(90, 103, 216, 0.3);
+                z-index: 9999;
+                opacity: 1;
+                transition: opacity 0.5s ease;
+            `;
+            notification.textContent = '🌟 autism mode activated';
+            document.body.appendChild(notification);
+            
+            // fade out after 3 seconds
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => notification.remove(), 500);
+            }, 3000);
+
             console.log('🌟 interface transformed:');
             console.log('- reduced motion ✓');
             console.log('- softer colors ✓');
@@ -1785,7 +1804,10 @@
             console.log('- predictable interactions ✓');
             console.log('- increased spacing ✓');
             console.log('- better contrast ✓');
+            console.log('- emoji indicators ✓');
+            console.log('');
             console.log('run window.autismify() again to toggle off');
+            console.log('run window.autismify({comicSans: false}) to disable comic sans');
         };
 
         // expose accessibility settings to console
